@@ -36,9 +36,8 @@ void verus_setBlock(void *blockf,const void *pTargetIn)
 {
     CUDA_SAFE_CALL(cudaMemcpyToSymbol(ptarget, pTargetIn, 8*sizeof(uint32_t), 0, cudaMemcpyHostToDevice));
  	CUDA_SAFE_CALL(cudaMemcpyToSymbol(blockhash_half, blockf, 64*sizeof(uint8_t), 0, cudaMemcpyHostToDevice));
-	
-        
 };
+
 __host__ 
 void verus_hash(int thr_id, uint32_t threads, uint32_t startNonce, uint32_t *resNonces)
 {
@@ -51,31 +50,28 @@ void verus_hash(int thr_id, uint32_t threads, uint32_t startNonce, uint32_t *res
 	verus_gpu_hash<<<grid, block>>>(threads, startNonce, d_nonces[thr_id]);
 	cudaThreadSynchronize();
 	cudaMemcpy(resNonces, d_nonces[thr_id], 2*sizeof(uint32_t), cudaMemcpyDeviceToHost);
-
-	
  
 };
+
 __global__ 
 void verus_gpu_hash(uint32_t threads, uint32_t startNonce, uint32_t *resNonce)
 {
-	
-
 	uint32_t thread = blockDim.x * blockIdx.x + threadIdx.x;
 	if (thread < threads)
-	{uint32_t nounce = startNonce + thread;
+	{
+			uint32_t nounce = startNonce + thread;
 
-    uint8_t hash_buf[64];
-    uint8_t blockhash[64];
+			uint8_t hash_buf[64];
+			uint8_t blockhash[64];
     
-    memcpy(hash_buf,blockhash_half,128);
-    memset(hash_buf + 32, 0x0,32);
-    //memcpy(hash_buf + 32, (unsigned char *)&full_data + 1486 - 14, 15);
-    ((uint32_t *)&hash_buf)[8] = nounce;
+			memcpy(hash_buf,blockhash_half,128);
+			memset(hash_buf + 32, 0x0,32);
+			//memcpy(hash_buf + 32, (unsigned char *)&full_data + 1486 - 14, 15);
+			((uint32_t *)&hash_buf)[8] = nounce;
   
-    
-    haraka512_full((unsigned char*)blockhash, (unsigned char*)hash_buf); // ( out, in)
+			haraka512_full((unsigned char*)blockhash, (unsigned char*)hash_buf); // ( out, in)
 
-		if (((uint64_t*)&blockhash)[3] < ((uint64_t*)&ptarget)[3]) { resNonce[0] = nounce;}   
+			if (((uint64_t*)&blockhash)[3] < ((uint64_t*)&ptarget)[3]) { resNonce[0] = nounce;}   
     }
 };
 
@@ -83,9 +79,6 @@ __device__ void memcpy_decker(unsigned char *dst, unsigned char *src, int len) {
     int i;
     for (i=0; i<len; i++) { dst[i] = src[i]; }
 }
-
-
-
 
 //__constant__ static const
 __device__  unsigned char sbox[256] =
@@ -110,6 +103,29 @@ __device__  unsigned char sbox[256] =
   0x87, 0xe9, 0xce, 0x55, 0x28, 0xdf, 0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42,
   0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16 };
 
+__device__  unsigned char smod[256] =
+{ 0x00, 0x03, 0x06, 0x05, 0x0C, 0x0F, 0x0A, 0x09, 0x18, 0x1B, 0x1E, 0x1D, 0x14,
+0x17, 0x12, 0x11, 0x30, 0x33, 0x36, 0x35, 0x3C, 0x3F, 0x3A, 0x39, 0x28, 0x2B,
+0x2E, 0x2D, 0x24, 0x27, 0x22, 0x21, 0x60, 0x63, 0x66, 0x65, 0x6C, 0x6F, 0x6A,
+0x69, 0x78, 0x7B, 0x7E, 0x7D, 0x74, 0x77, 0x72, 0x71, 0x50, 0x53, 0x56, 0x55,
+0x5C, 0x5F, 0x5A, 0x59, 0x48, 0x4B, 0x4E, 0x4D, 0x44, 0x47, 0x42, 0x41, 0xC0,
+0xC3, 0xC6, 0xC5, 0xCC, 0xCF, 0xCA, 0xC9, 0xD8, 0xDB, 0xDE, 0xDD, 0xD4, 0xD7,
+0xD2, 0xD1, 0xF0, 0xF3, 0xF6, 0xF5, 0xFC, 0xFF, 0xFA, 0xF9, 0xE8, 0xEB, 0xEE,
+0xED, 0xE4, 0xE7, 0xE2, 0xE1, 0xA0, 0xA3, 0xA6, 0xA5, 0xAC, 0xAF, 0xAA, 0xA9,
+0xB8, 0xBB, 0xBE, 0xBD, 0xB4, 0xB7, 0xB2, 0xB1, 0x90, 0x93, 0x96, 0x95, 0x9C,
+0x9F, 0x9A, 0x99, 0x88, 0x8B, 0x8E, 0x8D, 0x84, 0x87, 0x82, 0x81, 0x9B, 0x98,
+0x9D, 0x9E, 0x97, 0x94, 0x91, 0x92, 0x83, 0x80, 0x85, 0x86, 0x8F, 0x8C, 0x89,
+0x8A, 0xAB, 0xA8, 0xAD, 0xAE, 0xA7, 0xA4, 0xA1, 0xA2, 0xB3, 0xB0, 0xB5, 0xB6,
+0xBF, 0xBC, 0xB9, 0xBA, 0xFB, 0xF8, 0xFD, 0xFE, 0xF7, 0xF4, 0xF1, 0xF2, 0xE3,
+0xE0, 0xE5, 0xE6, 0xEF, 0xEC, 0xE9, 0xEA, 0xCB, 0xC8, 0xCD, 0xCE, 0xC7, 0xC4,
+0xC1, 0xC2, 0xD3, 0xD0, 0xD5, 0xD6, 0xDF, 0xDC, 0xD9, 0xDA, 0x5B, 0x58, 0x5D,
+0x5E, 0x57, 0x54, 0x51, 0x52, 0x43, 0x40, 0x45, 0x46, 0x4F, 0x4C, 0x49, 0x4A,
+0x6B, 0x68, 0x6D, 0x6E, 0x67, 0x64, 0x61, 0x62, 0x73, 0x70, 0x75, 0x76, 0x7F,
+0x7C, 0x79, 0x7A, 0x3B, 0x38, 0x3D, 0x3E, 0x37, 0x34, 0x31, 0x32, 0x23, 0x20,
+0x25, 0x26, 0x2F, 0x2C, 0x29, 0x2A, 0x0B, 0x08, 0x0D, 0x0E, 0x07, 0x04, 0x01,
+0x02, 0x13, 0x10, 0x15, 0x16, 0x1F, 0x1C, 0x19, 0x1A };
+
+
 #define XT(x) (((x) << 1) ^ ((((x) >> 7) & 1) * 0x1b))
 
 // Simulate _mm_aesenc_si128 instructions from AESNI
@@ -130,6 +146,132 @@ __device__  void aesenc(unsigned char *s,const unsigned char sharedMemory1[256])
     for (i = 0; i < 16; ++i) {
         s[i] = v[i / 4][i % 4]; // VerusHash have 0 rc vector
     }
+}
+
+__device__ void aesenc_double(unsigned char *s, const unsigned char sharedMemory1[256], const unsigned char sharedMemory2[256])
+{
+	unsigned char v0, v1, v2, v3, v4, v5, v6, v7;
+	unsigned char t0, t1, t2;
+
+	v0 = sharedMemory1[s[0]];
+	v1 = sharedMemory1[s[5]];
+	v2 = sharedMemory1[s[10]];
+	v3 = sharedMemory1[s[15]];
+	v4 = sharedMemory1[s[3]];
+	v5 = sharedMemory1[s[2]];
+	v6 = sharedMemory1[s[1]];
+
+	t0 = v0 ^ v1;
+	t1 = v1 ^ v2;
+	t2 = v2 ^ v3;
+
+	s[0] = sharedMemory2[t0] ^ v0 ^ t2;
+	s[1] = sharedMemory2[t1] ^ t0 ^ v3;
+	s[2] = sharedMemory2[t2] ^ v2 ^ t0;
+	s[3] = sharedMemory2[v3 ^ v0] ^ v3 ^ t1;
+
+	v0 = sharedMemory1[s[4]];
+	v1 = sharedMemory1[s[9]];
+	v2 = sharedMemory1[s[14]];
+	v3 = v4;
+	v4 = sharedMemory1[s[7]];
+	v7 = sharedMemory1[s[6]];
+
+	t0 = v0 ^ v1;
+	t1 = v1 ^ v2;
+	t2 = v2 ^ v3;
+
+	s[4] = sharedMemory2[t0] ^ v0 ^ t2;
+	s[5] = sharedMemory2[t1] ^ t0 ^ v3;
+	s[6] = sharedMemory2[t2] ^ v2 ^ t0;
+	s[7] = sharedMemory2[v3 ^ v0] ^ v3 ^ t1;
+
+	v0 = sharedMemory1[s[8]];
+	v1 = sharedMemory1[s[13]];
+	v2 = v5;
+	v3 = v4;
+	v5 = sharedMemory1[s[11]];
+
+	t0 = v0 ^ v1;
+	t1 = v1 ^ v2;
+	t2 = v2 ^ v3;
+
+	s[8] = sharedMemory2[t0] ^ v0 ^ t2;
+	s[9] = sharedMemory2[t1] ^ t0 ^ v3;
+
+	s[10] = sharedMemory2[t2] ^ v2 ^ t0;
+	s[11] = sharedMemory2[v3 ^ v0] ^ v3 ^ t1;
+
+	v0 = sharedMemory1[s[12]];
+	v1 = v6;
+	v2 = v7;
+	v3 = v5;
+
+	t0 = v0 ^ v1;
+	t1 = v1 ^ v2;
+	t2 = v2 ^ v3;
+	s[12] = sharedMemory2[t0] ^ v0 ^ t2;
+	s[13] = sharedMemory2[t1] ^ t0 ^ v3;
+	s[14] = sharedMemory2[t2] ^ v2 ^ t0;
+	s[15] = sharedMemory2[v3 ^ v0] ^ v3 ^ t1;
+
+	v0 = sharedMemory1[s[0]];
+	v1 = sharedMemory1[s[5]];
+	v2 = sharedMemory1[s[10]];
+	v3 = sharedMemory1[s[15]];
+	v4 = sharedMemory1[s[3]];
+	v5 = sharedMemory1[s[2]];
+	v6 = sharedMemory1[s[1]];
+
+	t0 = v0 ^ v1;
+	t1 = v1 ^ v2;
+	t2 = v2 ^ v3;
+	s[0] = sharedMemory2[t0] ^ v0 ^ t2;
+	s[1] = sharedMemory2[t1] ^ t0 ^ v3;
+	s[2] = sharedMemory2[t2] ^ v2 ^ t0;
+	s[3] = sharedMemory2[v3 ^ v0] ^ v3 ^ t1;
+
+	v0 = sharedMemory1[s[4]];
+	v1 = sharedMemory1[s[9]];
+	v2 = sharedMemory1[s[14]];
+	v3 = v4;
+	v4 = sharedMemory1[s[7]];
+	v7 = sharedMemory1[s[6]];
+
+	t0 = v0 ^ v1;
+	t1 = v1 ^ v2;
+	t2 = v2 ^ v3;
+	s[4] = sharedMemory2[t0] ^ v0 ^ t2;
+	s[5] = sharedMemory2[t1] ^ t0 ^ v3;
+	s[6] = sharedMemory2[t2] ^ v2 ^ t0;
+	s[7] = sharedMemory2[v3 ^ v0] ^ v3 ^ t1;
+
+	v0 = sharedMemory1[s[8]];
+	v1 = sharedMemory1[s[13]];
+	v2 = v5;
+	v3 = v4;
+	v5 = sharedMemory1[s[11]];
+
+	t0 = v0 ^ v1;
+	t1 = v1 ^ v2;
+	t2 = v2 ^ v3;
+	s[8] = sharedMemory2[t0] ^ v0 ^ t2;
+	s[9] = sharedMemory2[t1] ^ t0 ^ v3;
+	s[10] = sharedMemory2[t2] ^ v2 ^ t0;
+	s[11] = sharedMemory2[v3 ^ v0] ^ v3 ^ t1;
+
+	v0 = sharedMemory1[s[12]];
+	v1 = v6;
+	v2 = v7;
+	v3 = v5;
+
+	t0 = v0 ^ v1;
+	t1 = v1 ^ v2;
+	t2 = v2 ^ v3;
+	s[12] = sharedMemory2[t0] ^ v0 ^ t2;
+	s[13] = sharedMemory2[t1] ^ t0 ^ v3;
+	s[14] = sharedMemory2[t2] ^ v2 ^ t0;
+	s[15] = sharedMemory2[v3 ^ v0] ^ v3 ^ t1;
 }
 
 // Simulate _mm_unpacklo_epi32
@@ -158,10 +300,13 @@ __device__ __forceinline__ void unpackhi32(unsigned char *t, unsigned char *a, u
 
 __device__ void haraka512_perm(unsigned char *out, const unsigned char *in) 
 {
+
     int i, j;
 	__shared__ unsigned char sharedMemory1[256];
-	if (threadIdx.x < 256)
+	
+	if (threadIdx.x < 256) 
 		sharedMemory1[threadIdx.x] = sbox[threadIdx.x];
+
     unsigned char s[64], tmp[16];
     memcpy_decker(s, (unsigned char *)in, 64);
 #pragma unroll
@@ -190,7 +335,7 @@ __device__ void haraka512_perm(unsigned char *out, const unsigned char *in)
     memcpy_decker(out, s, 64);
 }
 
-__device__ void haraka512_full(unsigned char *out, const unsigned char *in)
+/*__device__ void haraka512_full(unsigned char *out, const unsigned char *in)
 {
     int i;
 
@@ -200,9 +345,121 @@ __device__ void haraka512_full(unsigned char *out, const unsigned char *in)
         buf[i] = buf[i] ^ in[i];
     }
 
-    /* Truncated */
     memcpy_decker(out,      buf + 8, 8);
     memcpy_decker(out + 8,  buf + 24, 8);
     memcpy_decker(out + 16, buf + 32, 8);
     memcpy_decker(out + 24, buf + 48, 8);
+}*/
+
+__device__ void haraka512_full(unsigned char *out, const unsigned char *in) {
+
+	__shared__ unsigned char sharedMemory1[256];
+	__shared__ unsigned char sharedMemory2[256];
+
+	if (threadIdx.x < 256)
+		sharedMemory1[threadIdx.x] = sbox[threadIdx.x];
+	if (threadIdx.x < 256)
+		sharedMemory2[threadIdx.x] = smod[threadIdx.x];
+
+	unsigned char s[64];
+	uint32_t *sd = (uint32_t*)(&s[0]);
+	memcpy_decker(s, (unsigned char *)in, 64);
+	
+	#pragma unroll
+	for (int i = 0; i < 4; ++i) {
+
+		aesenc_double(s, sharedMemory1, sharedMemory2);
+		aesenc_double(s + 16, sharedMemory1, sharedMemory2);
+		aesenc_double(s + 32, sharedMemory1, sharedMemory2);
+		aesenc_double(s + 48, sharedMemory1, sharedMemory2);
+
+		// mixing
+		uint32_t t;
+
+		t = sd[0];
+		sd[0] = sd[3];
+		sd[3] = sd[15];
+		sd[15] = sd[14];
+		sd[14] = sd[6];
+		sd[6] = sd[12];
+		sd[12] = sd[2];
+		sd[2] = sd[7];
+		sd[7] = sd[4];
+		sd[4] = sd[8];
+		sd[8] = sd[9];
+		sd[9] = sd[1];
+		sd[1] = sd[11];
+		sd[11] = sd[5];
+		sd[5] = t;
+
+		t = sd[13];
+		sd[13] = sd[10];
+		sd[10] = t;
+	}
+
+	aesenc_double(s, sharedMemory1, sharedMemory2);
+	aesenc_double(s + 16, sharedMemory1, sharedMemory2);
+	aesenc_double(s + 32, sharedMemory1, sharedMemory2);
+	aesenc_double(s + 48, sharedMemory1, sharedMemory2);
+
+	uint32_t *outd = ((uint32_t *)out);
+	uint32_t *ind = ((uint32_t *)in);
+
+	//__syncthreads();
+	*outd++ = sd[7] ^ ind[2];
+	*outd++ = sd[15] ^ ind[3];
+	*outd++ = sd[12] ^ ind[6];
+	*outd++ = sd[4] ^ ind[7];
+	*outd++ = sd[9] ^ ind[8];
+	*outd++ = sd[1] ^ ind[9];
+	*outd++ = sd[2] ^ ind[12];
+	*outd = sd[10] ^ ind[13];
+	//__syncthreads();
+
+
+	/*
+
+	// original variant
+
+	int i, j;
+	unsigned char buf[64];
+
+	unsigned char s[64], tmp[16];
+	memcpy_decker(s, (unsigned char *)in, 64);
+	#pragma unroll
+	for (i = 0; i < 5; ++i) {
+		// aes round(s)
+
+		for (j = 0; j < 2; ++j) {
+
+			aesenc(s, sharedMemory1);
+			aesenc(s + 16, sharedMemory1);
+			aesenc(s + 32, sharedMemory1);
+			aesenc(s + 48, sharedMemory1);
+		}
+
+		unpacklo32(tmp, s, s + 16);
+
+		unpackhi32(s, s, s + 16);
+		unpacklo32(s + 16, s + 32, s + 48);
+		unpackhi32(s + 32, s + 32, s + 48);
+		unpacklo32(s + 48, s, s + 32);
+		unpackhi32(s, s, s + 32);
+		unpackhi32(s + 32, s + 16, tmp);
+		unpacklo32(s + 16, s + 16, tmp);
+	}
+
+	memcpy_decker(buf, s, 64);
+	
+
+	for (i = 0; i < 64; i++) {
+		buf[i] = buf[i] ^ in[i];
+	}
+
+	memcpy_decker(out, buf + 8, 8);
+	memcpy_decker(out + 8, buf + 24, 8);
+	memcpy_decker(out + 16, buf + 32, 8);
+	memcpy_decker(out + 24, buf + 48, 8);
+	*/
+
 }
