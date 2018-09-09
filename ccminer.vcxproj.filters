@@ -1039,9 +1039,6 @@
     <CudaCompile Include="verus\verus.cu">
       <Filter>Source Files\CUDA\verus</Filter>
     </CudaCompile>
-    <CudaCompile Include="verus\verusscan.cu">
-      <Filter>Source Files\CUDA\verus</Filter>
-    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\ccminer.ico">
