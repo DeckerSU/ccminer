@@ -21,12 +21,13 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{36DC07F9-A4A6-4877-A146-1B960083CF6F}</ProjectGuid>
     <RootNamespace>ccminer</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CLRSupport>false</CLRSupport>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
@@ -39,7 +40,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
-    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 9.0.props" />
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 9.2.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -623,7 +624,7 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 9.0.targets" />
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 9.2.targets" />
   </ImportGroup>
   <!-- Copy the required dlls -->
   <Target Name="AfterBuild">
