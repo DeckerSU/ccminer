@@ -269,6 +269,7 @@
     <ClCompile Include="neoscrypt\neoscrypt.cpp" />
     <ClCompile Include="neoscrypt\neoscrypt-cpu.c" />
     <ClInclude Include="neoscrypt\cuda_vectors.h" />
+    <ClInclude Include="verus\haraka.h" />
     <ClInclude Include="x11\cuda_x11_simd512_sm2.cuh" />
     <ClInclude Include="x16\cuda_x16.h" />
     <CudaCompile Include="Algo256\bmw.cu" />
@@ -333,6 +334,8 @@
     <ClCompile Include="sph\hamsi.c" />
     <ClCompile Include="sph\hamsi_helper.c" />
     <ClCompile Include="sph\whirlpool.c" />
+    <ClCompile Include="verus\haraka.c" />
+    <ClCompile Include="verus\verusscan.cpp" />
     <ClCompile Include="x13\sm3.c" />
   </ItemGroup>
   <ItemGroup>
@@ -436,6 +439,8 @@
     <CudaCompile Include="sha256\sha256d.cu" />
     <CudaCompile Include="sha256\cuda_sha256t.cu" />
     <CudaCompile Include="sha256\sha256t.cu" />
+    <CudaCompile Include="verus\verus.cu" />
+    <CudaCompile Include="verus\verusscan.cu" />
     <CudaCompile Include="zr5.cu" />
     <CudaCompile Include="heavy\cuda_blake512.cu">
     </CudaCompile>

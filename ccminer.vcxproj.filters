@@ -121,6 +121,9 @@
     <Filter Include="Source Files\CUDA\x12">
       <UniqueIdentifier>{xde48d89-fx12-1323-129a-b592fe2b2de3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\CUDA\verus">
+      <UniqueIdentifier>{1fdd23ac-01e6-427a-8333-9722603a04a5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="compat\jansson\dump.c">
@@ -356,6 +359,12 @@
     </ClCompile>
     <ClCompile Include="equi\blake2\blake2bx.cpp">
       <Filter>Source Files\equi</Filter>
+    </ClCompile>
+    <ClCompile Include="verus\haraka.c">
+      <Filter>Source Files\CUDA\verus</Filter>
+    </ClCompile>
+    <ClCompile Include="verus\verusscan.cpp">
+      <Filter>Source Files\CUDA\verus</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -610,6 +619,9 @@
     </ClInclude>
     <ClInclude Include="x16\cuda_x16.h">
       <Filter>Header Files\CUDA</Filter>
+    </ClInclude>
+    <ClInclude Include="verus\haraka.h">
+      <Filter>Source Files\CUDA\verus</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1023,6 +1035,12 @@
     </CudaCompile>
     <CudaCompile Include="x16\x16s.cu">
       <Filter>Source Files\CUDA\x16</Filter>
+    </CudaCompile>
+    <CudaCompile Include="verus\verus.cu">
+      <Filter>Source Files\CUDA\verus</Filter>
+    </CudaCompile>
+    <CudaCompile Include="verus\verusscan.cu">
+      <Filter>Source Files\CUDA\verus</Filter>
     </CudaCompile>
   </ItemGroup>
   <ItemGroup>
